@@ -1,46 +1,427 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>My Google‑Style Site</title>
-  <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FNAF Launcher</title>
+
+  <style>
+    @import url("https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;500;600;700;800&family=Share+Tech+Mono&display=swap");
+
+    :root {
+      --background: #080a0f;
+      --panel: #10141c;
+      --border: #2b3544;
+      --text: #e7ecf3;
+      --muted: #8793a3;
+      --yellow: #f5b83d;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 75% 10%, rgba(95, 168, 211, 0.08), transparent 30%),
+        linear-gradient(135deg, #080a0f, #0d1118, #080a0f);
+      font-family: "Barlow Condensed", Arial, sans-serif;
+    }
+
+    .scanlines {
+      position: fixed;
+      inset: 0;
+      z-index: 10;
+      pointer-events: none;
+      opacity: 0.04;
+      background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 3px,
+        #fff 4px
+      );
+    }
+
+    .topbar,
+    footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px clamp(20px, 5vw, 72px);
+      border-bottom: 1px solid var(--border);
+      background: rgba(8, 10, 15, 0.86);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .brand-mark {
+      display: grid;
+      place-items: center;
+      width: 42px;
+      height: 42px;
+      padding-top: 8px;
+      color: var(--background);
+      background: var(--yellow);
+      clip-path: polygon(50% 0, 100% 100%, 0 100%);
+      font-size: 25px;
+    }
+
+    .eyebrow,
+    .status,
+    footer,
+    .game-number,
+    .meta-label {
+      color: var(--muted);
+      font-family: "Share Tech Mono", monospace;
+      font-size: 0.7rem;
+      letter-spacing: 0.12em;
+    }
+
+    .eyebrow {
+      margin: 0 0 3px;
+    }
+
+    h1,
+    h2,
+    h3,
+    p {
+      margin-top: 0;
+    }
+
+    h1 {
+      margin-bottom: 0;
+      font-size: clamp(1.3rem, 3vw, 2rem);
+      letter-spacing: 0.08em;
+    }
+
+    .status {
+      margin: 0;
+    }
+
+    .status span {
+      display: inline-block;
+      width: 7px;
+      height: 7px;
+      margin-right: 7px;
+      border-radius: 50%;
+      background: #61d18a;
+      box-shadow: 0 0 10px #61d18a;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1.45fr) minmax(300px, 0.75fr);
+      gap: 34px;
+      width: min(1400px, 100%);
+      margin: auto;
+      padding: clamp(28px, 5vw, 70px) clamp(20px, 5vw, 72px);
+    }
+
+    .section-heading {
+      display: flex;
+      justify-content: space-between;
+      align-items: end;
+      margin-bottom: 22px;
+    }
+
+    .section-heading h2 {
+      margin: 0;
+      font-size: clamp(2rem, 4vw, 3.5rem);
+      line-height: 0.9;
+    }
+
+    #gameCount {
+      color: var(--yellow);
+      font-family: "Share Tech Mono", monospace;
+      font-size: 0.75rem;
+    }
+
+    .game-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+      gap: 14px;
+    }
+
+    .game-card {
+      position: relative;
+      overflow: hidden;
+      min-height: 238px;
+      padding: 0;
+      border: 1px solid var(--border);
+      color: var(--text);
+      background: var(--panel);
+      cursor: pointer;
+      text-align: left;
+      transition: 0.18s ease;
+    }
+
+    .game-card:hover,
+    .game-card.active {
+      border-color: var(--yellow);
+      box-shadow: 0 0 0 1px var(--yellow), 0 12px 30px #0008;
+      transform: translateY(-5px);
+    }
+
+    .cover,
+    .detail-image {
+      display: block;
+      width: 100%;
+      object-fit: cover;
+      background: #202733;
+    }
+
+    .cover {
+      height: 174px;
+    }
+
+    .card-info {
+      padding: 12px;
+    }
+
+    .game-number {
+      margin-bottom: 5px;
+      color: var(--yellow);
+    }
+
+    .card-info h3 {
+      margin: 0;
+      font-size: 1.22rem;
+      line-height: 1;
+    }
+
+    .details-panel {
+      position: sticky;
+      top: 24px;
+      align-self: start;
+      min-height: 500px;
+      border: 1px solid var(--border);
+      background: var(--panel);
+      box-shadow: 12px 12px #0003;
+    }
+
+    .empty-state {
+      display: grid;
+      place-items: center;
+      min-height: 500px;
+      padding: 30px;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    .empty-state h2 {
+      margin: 12px 0 5px;
+      color: var(--text);
+    }
+
+    .empty-icon {
+      display: grid;
+      place-items: center;
+      width: 65px;
+      height: 65px;
+      border: 1px solid var(--border);
+      color: var(--yellow);
+      font-family: "Share Tech Mono", monospace;
+      font-size: 2rem;
+    }
+
+    .detail-image {
+      height: 245px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .detail-content {
+      padding: 24px;
+    }
+
+    .detail-content h2 {
+      margin: 4px 0 8px;
+      font-size: clamp(2rem, 4vw, 3rem);
+      line-height: 0.9;
+    }
+
+    .detail-content p {
+      color: var(--muted);
+      line-height: 1.45;
+    }
+
+    .detail-meta {
+      display: flex;
+      gap: 26px;
+      margin: 20px 0;
+    }
+
+    .detail-meta strong {
+      display: block;
+      margin-top: 4px;
+      font-size: 1.1rem;
+    }
+
+    .play-button {
+      width: 100%;
+      padding: 14px 18px;
+      border: 0;
+      color: #161108;
+      background: var(--yellow);
+      font-family: inherit;
+      font-size: 1.15rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      cursor: pointer;
+    }
+
+    .play-button:hover {
+      background: #ffd16a;
+    }
+
+    footer {
+      border-top: 1px solid var(--border);
+      border-bottom: 0;
+    }
+
+    @media (max-width: 900px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+
+      .details-panel {
+        position: relative;
+        top: 0;
+      }
+    }
+
+    @media (max-width: 560px) {
+      .topbar,
+      footer {
+        align-items: flex-start;
+        gap: 12px;
+        flex-direction: column;
+      }
+
+      .game-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .cover {
+        height: 145px;
+      }
+    }
+  </style>
 </head>
 
 <body>
+  <div class="scanlines"></div>
 
-  <header class="site-header">
-    <h1>My Google‑Style Website</h1>
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-mark">⚠</span>
+      <div>
+        <p class="eyebrow">FAZBEAR ENTERTAINMENT</p>
+        <h1>GAME ARCHIVES</h1>
+      </div>
+    </div>
+
+    <p class="status"><span></span>SYSTEM ONLINE</p>
   </header>
 
-  <div class="layout">
-
-    <nav class="sidebar">
-      <h3>Navigation</h3>
-      <ul>
-        <li><a href="index.html">Home</a></li>
-        <li><a href="about.html">About</a></li>
-        <li><a href="projects.html">Projects</a></li>
-      </ul>
-    </nav>
-
-    <main class="content">
-      <div class="card">
-        <h2>Welcome</h2>
-        <p>This is a Google Sites‑style layout built for GitHub Pages.</p>
+  <main class="layout">
+    <section class="library">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">SECURITY DATABASE / 1983—2018</p>
+          <h2>Select a title</h2>
+        </div>
+        <p id="gameCount"></p>
       </div>
 
-      <div class="card">
-        <h2>Easy Editing</h2>
-        <p>Just edit the HTML files — no coding knowledge required.</p>
+      <div id="gameGrid" class="game-grid"></div>
+    </section>
+
+    <aside id="detailsPanel" class="details-panel">
+      <div class="empty-state">
+        <div class="empty-icon">?</div>
+        <h2>Archive Locked</h2>
+        <p>Select a game to inspect its file.</p>
       </div>
+    </aside>
+  </main>
 
-      <div class="card">
-        <h2>Responsive Design</h2>
-        <p>The layout automatically adjusts for phones, tablets, and desktops.</p>
-      </div>
-    </main>
+  <footer>
+    <span>FREDDY FAZBEAR'S PIZZA</span>
+    <span>© ARCHIVE TERMINAL</span>
+  </footer>
 
-  </div>
+  <script>
+    const games = [
+      ["Five Nights at Freddy's", "FNAF 1", "2014", "01", "319510", "Survive five nights as a security guard while the animatronics roam the pizzeria after dark.", "https://dorukyum.github.io/FNAF-Web/"],
+      ["Five Nights at Freddy's 2", "FNAF 2", "2014", "02", "332800", "A new Freddy Fazbear's Pizza has new animatronics and a familiar night-shift problem.", "https://irv77.github.io/hd_fnaf/2/"],
+      ["Five Nights at Freddy's 3", "FNAF 3", "2015", "03", "354140", "Thirty years after Freddy's closed, a horror attraction brings an old secret back to life.", "https://better-indigo-bmlaoh1pcs.edgeone.app/"],
+      ["Five Nights at Freddy's 4", "FNAF 4", "2015", "04", "388090", "Face the nightmares hiding in a child's bedroom and survive until 6 AM.", "https://irv77.github.io/hd_fnaf/4/"],
+      ["FNAF World", "FNAF WORLD", "2016", "05", "427920", "Build a party from the animatronics and explore a strange RPG adventure.", "https://irv77.github.io/hd_fnaf/w/"],
+      ["Five Nights at Freddy's: Sister Location", "SISTER LOCATION", "2016", "06", "506610", "Work the night shift at Circus Baby's Entertainment and Rental.", "https://irv77.github.io/hd_fnaf/sl/"],
+      ["Freddy Fazbear's Pizzeria Simulator", "PIZZERIA SIMULATOR", "2017", "07", "738060", "Build your own pizzeria by day and discover what waits in the back room.", "https://irv77.github.io/hd_fnaf/ps/"],
+      ["Ultimate Custom Night", "UCN", "2018", "08", "871720", "Customize your ultimate night of terror with up to fifty animatronic opponents.", "https://irv77.github.io/hd_fnaf/ucn/"]
+    ];
 
+    const grid = document.getElementById("gameGrid");
+    const panel = document.getElementById("detailsPanel");
+    document.getElementById("gameCount").textContent = `${games.length} ARCHIVED TITLES`;
+
+    games.forEach((game, index) => {
+      const [title, shortTitle, year, number, imageId] = game;
+      const image = `https://cdn.cloudflare.steamstatic.com/steam/apps/${imageId}/header.jpg`;
+
+      const card = document.createElement("button");
+      card.className = "game-card";
+      card.setAttribute("aria-label", `Select ${title}`);
+      card.innerHTML = `
+        <img class="cover" src="${image}" alt="${title} cover image">
+        <div class="card-info">
+          <div class="game-number">FILE_${number}</div>
+          <h3>${shortTitle}</h3>
+        </div>
+      `;
+
+      card.addEventListener("click", () => {
+        document.querySelectorAll(".game-card").forEach(item => item.classList.remove("active"));
+        card.classList.add("active");
+
+        panel.innerHTML = `
+          <img class="detail-image" src="${image}" alt="${title} title image">
+          <div class="detail-content">
+            <div class="eyebrow">ARCHIVE FILE_${number}</div>
+            <h2>${title}</h2>
+            <p>${game[5]}</p>
+
+            <div class="detail-meta">
+              <div>
+                <span class="meta-label">RELEASED</span>
+                <strong>${year}</strong>
+              </div>
+              <div>
+                <span class="meta-label">STATUS</span>
+                <strong>AVAILABLE</strong>
+              </div>
+            </div>
+
+            <button class="play-button">PLAY TITLE ↗</button>
+          </div>
+        `;
+
+        panel.querySelector(".play-button").addEventListener("click", () => {
+          window.open(game[6], "_blank", "noopener,noreferrer");
+        });
+      });
+
+      grid.appendChild(card);
+    });
+  </script>
 </body>
 </html>
+
